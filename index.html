@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="markedApp">
+<head>
+    <title>GHFM</title>
+
+    <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./bower_components/highlightjs/styles/gitHub.css">
+
+    <style type="text/css" media="screen">
+      body {
+        padding-top: 100px;
+      }
+
+      textarea {
+        overflow: hidden;
+      }
+    </style>
+</head>
+<body>
+
+
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <h2>GitHub flavored markdown with angular.js and marked</h2>
+  </div>
+</nav>
+
+<div class="container-fluid" ng-controller="markedController as marked">
+  <div class="row">
+    <div class="col-sm-6">
+      <textarea class="form-control" id="inputText" ng-model="marked.inputText" auto-grow></textarea>
+    </div>
+    <div class="col-sm-6">
+      <div id="outputText" ng-bind-html="marked.outputText"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="./bower_components/angular/angular.min.js"></script>
+<script type="text/javascript" src="./bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<script type="text/javascript" src="./bower_components/marked/lib/marked.js"></script>
+<script type="text/javascript" src="./bower_components/highlightjs/highlight.pack.js"></script>
+
+<script type="text/javascript">
+
+  var markedApp = angular.module('markedApp', ['ngSanitize']);
+
+  markedApp.directive("autoGrow", function(){
+      return function(scope, element, attr){
+          var update = function(){
+              element.css("height", "auto");
+              element.css("height", element[0].scrollHeight + "px");
+          };
+          scope.$watch(attr.ngModel, function(){
+              update();
+          });
+          attr.$set("ngTrim", "false");
+      };
+  });
+
+  markedApp.controller('markedController', ['$scope', function($scope) {
+
+    var markdown = this;
+
+    this.inputText = '';
+
+    $scope.$watch('marked.inputText', function(current, original) {
+      markdown.outputText = marked(current);
+    });
+  }]);
+
+  marked.setOptions({
+    renderer: new marked.Renderer(),
+    gfm: true,
+    tables: true,
+    breaks: false,
+    pedantic: false,
+    sanitize: false, // if false -> allow plain old HTML ;)
+    smartLists: true,
+    smartypants: false,
+    highlight: function (code, lang) {
+      if (lang) {
+        return hljs.highlight(lang, code).value;
+      } else {
+        return hljs.highlightAuto(code).value;
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
